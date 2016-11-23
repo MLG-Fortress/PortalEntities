@@ -9,6 +9,8 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -16,9 +18,12 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -43,8 +48,7 @@ public class PortalEntities extends JavaPlugin implements Listener
     {
         if (!entity.hasMetadata("TRACKED") && isNearPortal(entity.getLocation()))
         {
-            entity.setMetadata("TRACKED", new FixedMetadataValue(this, true));
-            trackEntity(entity);
+            trackEntity(entity, false);
         }
     }
 
@@ -77,10 +81,21 @@ public class PortalEntities extends JavaPlugin implements Listener
 
     public void trackEntity(Entity entity)
     {
+        trackEntity(entity, true);
+    }
+
+    public void trackEntity(Entity entity, boolean check)
+    {
+        if (check)
+        {
+            if (entity.hasMetadata("TRACKED"))
+                return;
+        }
+        entity.setMetadata("TRACKED", new FixedMetadataValue(this, true));
         new BukkitRunnable()
         {
             //Amount of ticks to track this entity for
-            int ticks = 200;
+            //int ticks = 200;
             Location previousLocation = entity.getLocation();
             public void run()
             {
@@ -111,11 +126,11 @@ public class PortalEntities extends JavaPlugin implements Listener
                     previousLocation = entity.getLocation();
                 }
 
-                if (--ticks < 0)
-                {
-                    entity.removeMetadata("TRACKED", PortalEntities.instance);
-                    this.cancel();
-                }
+//                if (--ticks < 0)
+//                {
+//                    entity.removeMetadata("TRACKED", PortalEntities.instance);
+//                    this.cancel();
+//                }
             }
         }.runTaskTimer(this, 1L, 1L);
     }
@@ -206,6 +221,38 @@ public class PortalEntities extends JavaPlugin implements Listener
             }.runTaskLater(this, 1L);
         }
     }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    void onProjectileSomething(ProjectileLaunchEvent event)
+    {
+        trackEntity(event.getEntity());
+    }
+
+
+// [22:53:46] RoboMWM: hmmm thoughts on making an "EntityMoveEvent" in a plugin via creating a runnable for each entity, checking location on each tick and firing event if distance != 0 ??????????
+// [22:54:14] Yamakaja: RoboMWM, lol ?
+// [22:54:25] %electronicboy: I think I just died a lil inside
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    void onMobSpawn(EntitySpawnEvent event)
+    {
+        trackEntity(event.getEntity());
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    void onChunkLoad(ChunkLoadEvent event)
+    {
+        if (event.isNewChunk())
+            return;
+        for (Entity entity : event.getChunk().getEntities())
+        {
+            if (entity instanceof LivingEntity) //Yea I don't really care about armorstands and the like, sorry
+            {
+                trackEntity(entity);
+            }
+        }
+    }
+
 
 
 }
