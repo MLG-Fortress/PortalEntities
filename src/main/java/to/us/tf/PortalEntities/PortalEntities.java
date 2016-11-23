@@ -10,7 +10,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -21,7 +20,6 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -44,6 +42,20 @@ public class PortalEntities extends JavaPlugin implements Listener
         instance = this;
     }
 
+    /**
+     * Use at beginning of every event handler
+     * @return if world does not use portals
+     */
+    public boolean disabledWorld(World world)
+    {
+        return portalStick.config.DisabledWorlds.contains(world.getName());
+    }
+
+    public boolean disabledWorld(Location location)
+    {
+        return disabledWorld(location.getWorld());
+    }
+
     public void smartTrackEntity(Entity entity)
     {
         if (entity.getType() == EntityType.PLAYER)
@@ -64,7 +76,7 @@ public class PortalEntities extends JavaPlugin implements Listener
             Location portalLocation = convertV10Location(portal.inside[0]);
             try
             {
-                if (location.distanceSquared(portalLocation) < 25) //5 blocks
+                if (location.distanceSquared(portalLocation) < 49) //7 blocks
                     return true;
                 continue;
             }
@@ -88,8 +100,6 @@ public class PortalEntities extends JavaPlugin implements Listener
 
     public void trackEntity(Entity entity, boolean check)
     {
-        if(portalStick.config.DisabledWorlds.contains(location.getWorld().getName()))
-            return;
         if (check)
         {
             if (entity.getType() == EntityType.PLAYER)
@@ -145,6 +155,8 @@ public class PortalEntities extends JavaPlugin implements Listener
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     void onBlockFall(EntityChangeBlockEvent event)
     {
+        if (disabledWorld(event.getBlock().getLocation())) return;
+
         if (event.getTo() == Material.AIR && event.getEntityType() == EntityType.FALLING_BLOCK)
             smartTrackEntity(event.getEntity());
     }
@@ -152,6 +164,7 @@ public class PortalEntities extends JavaPlugin implements Listener
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     void onItemSpawn(ItemSpawnEvent event)
     {
+        if (disabledWorld(event.getLocation())) return;
         smartTrackEntity(event.getEntity());
     }
 
@@ -159,6 +172,7 @@ public class PortalEntities extends JavaPlugin implements Listener
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     void onPlayerPlaceABlockThatFalls(BlockPlaceEvent event)
     {
+        if (disabledWorld(event.getBlock().getLocation())) return;
         Block block = event.getBlock();
         switch (block.getType())
         {
@@ -182,10 +196,8 @@ public class PortalEntities extends JavaPlugin implements Listener
     void onPlayerIgniteTNT(PlayerInteractEvent event)
     {
         Block block = event.getClickedBlock();
+        if (disabledWorld(block.getLocation())) return;
 
-        //Checking world now, since this can be expensive(?)
-        if(portalStick.config.DisabledWorlds.contains(block.getWorld().getName()))
-            return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
             return;
         if (event.getMaterial() == Material.FLINT_AND_STEEL && block.getType() == Material.TNT)
@@ -209,10 +221,8 @@ public class PortalEntities extends JavaPlugin implements Listener
     void onPlayerIgniteTNTByBreaking(BlockBreakEvent event)
     {
         Block block = event.getBlock();
+        if (disabledWorld(block.getLocation())) return;
 
-        //Checking world now, since this can be expensive(?)
-        if(portalStick.config.DisabledWorlds.contains(block.getWorld().getName()))
-            return;
         if (event.getBlock().getType() == Material.TNT)
         {
             new BukkitRunnable()
@@ -232,6 +242,8 @@ public class PortalEntities extends JavaPlugin implements Listener
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     void onProjectileSomething(ProjectileLaunchEvent event)
     {
+        if (disabledWorld(event.getEntity().getLocation())) return;
+
         trackEntity(event.getEntity());
     }
 
@@ -243,12 +255,16 @@ public class PortalEntities extends JavaPlugin implements Listener
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     void onMobSpawn(EntitySpawnEvent event)
     {
+        if (disabledWorld(event.getLocation())) return;
+
         trackEntity(event.getEntity());
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     void onChunkLoad(ChunkLoadEvent event)
     {
+        if (disabledWorld(event.getWorld())) return;
+
         if (event.isNewChunk())
             return;
         for (Entity entity : event.getChunk().getEntities())
