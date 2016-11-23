@@ -88,6 +88,8 @@ public class PortalEntities extends JavaPlugin implements Listener
 
     public void trackEntity(Entity entity, boolean check)
     {
+        if(portalStick.config.DisabledWorlds.contains(location.getWorld().getName()))
+            return;
         if (check)
         {
             if (entity.getType() == EntityType.PLAYER)
