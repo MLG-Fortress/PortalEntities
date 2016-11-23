@@ -46,6 +46,8 @@ public class PortalEntities extends JavaPlugin implements Listener
 
     public void smartTrackEntity(Entity entity)
     {
+        if (entity.getType() == EntityType.PLAYER)
+            return;
         if (!entity.hasMetadata("TRACKED") && isNearPortal(entity.getLocation()))
         {
             trackEntity(entity, false);
@@ -88,6 +90,8 @@ public class PortalEntities extends JavaPlugin implements Listener
     {
         if (check)
         {
+            if (entity.getType() == EntityType.PLAYER)
+                return;
             if (entity.hasMetadata("TRACKED"))
                 return;
         }
@@ -112,6 +116,7 @@ public class PortalEntities extends JavaPlugin implements Listener
                 catch (Exception e) //Somehow moved to another world, or otherwise erroring
                 {
                     this.cancel();
+                    entity.removeMetadata("TRACKED", PortalEntities.instance);
                     return;
                 }
 
@@ -252,7 +257,4 @@ public class PortalEntities extends JavaPlugin implements Listener
             }
         }
     }
-
-
-
 }
