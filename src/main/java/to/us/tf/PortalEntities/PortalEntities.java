@@ -4,9 +4,22 @@ import com.matejdro.bukkit.portalstick.Portal;
 import com.matejdro.bukkit.portalstick.PortalStick;
 import de.V10lator.PortalStick.V10Location;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -17,11 +30,22 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class PortalEntities extends JavaPlugin implements Listener
 {
     PortalStick portalStick;
+    static PortalEntities instance; //boo
 
     public void onEnable()
     {
         portalStick = (PortalStick)getServer().getPluginManager().getPlugin("PortalStick");
         getServer().getPluginManager().registerEvents(this, this);
+        instance = this;
+    }
+
+    public void smartTrackEntity(Entity entity)
+    {
+        if (!entity.hasMetadata("TRACKED") && isNearPortal(entity.getLocation()))
+        {
+            entity.setMetadata("TRACKED", new FixedMetadataValue(this, true));
+            trackEntity(entity);
+        }
     }
 
     public boolean isNearPortal(Location location)
@@ -86,10 +110,102 @@ public class PortalEntities extends JavaPlugin implements Listener
                 {
                     previousLocation = entity.getLocation();
                 }
-                
+
                 if (--ticks < 0)
+                {
+                    entity.removeMetadata("TRACKED", PortalEntities.instance);
                     this.cancel();
+                }
             }
         }.runTaskTimer(this, 1L, 1L);
     }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    void onBlockFall(EntityChangeBlockEvent event)
+    {
+        if (event.getTo() == Material.AIR && event.getEntityType() == EntityType.FALLING_BLOCK)
+            smartTrackEntity(event.getEntity());
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    void onItemSpawn(ItemSpawnEvent event)
+    {
+        smartTrackEntity(event.getEntity());
+    }
+
+    //[22:07:03] RoboMWM: is EntityChangeBlockEvent supposed to fire whenever a block turns into a FallingBlock (or primedTNT entity)? Seems to only do so when a blockphysicsevent is called on the block (and it's supposed to fall) or if it's placed in creative mode.
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    void onPlayerPlaceABlockThatFalls(BlockPlaceEvent event)
+    {
+        Block block = event.getBlock();
+        switch (block.getType())
+        {
+            case SAND:
+            case GRAVEL:
+                new BukkitRunnable()
+                {
+                    public void run()
+                    {
+                        for (Entity entity : block.getLocation().getChunk().getEntities())
+                        {
+                            if (entity.getType() == EntityType.FALLING_BLOCK)
+                                smartTrackEntity(entity);
+                        }
+                    }
+                }.runTaskLater(this, 1L);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    void onPlayerIgniteTNT(PlayerInteractEvent event)
+    {
+        Block block = event.getClickedBlock();
+
+        //Checking world now, since this can be expensive(?)
+        if(portalStick.config.DisabledWorlds.contains(block.getWorld().getName()))
+            return;
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
+            return;
+        if (event.getMaterial() == Material.FLINT_AND_STEEL && block.getType() == Material.TNT)
+        {
+            new BukkitRunnable()
+            {
+                public void run()
+                {
+                    for (Entity entity : block.getLocation().getChunk().getEntities())
+                    {
+                        if (entity.getType() == EntityType.PRIMED_TNT)
+                            smartTrackEntity(entity);
+                    }
+                }
+            }.runTaskLater(this, 1L);
+        }
+    }
+
+    //We use a plugin to restore the old TNT behavior (ignite when destroyed)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    void onPlayerIgniteTNTByBreaking(BlockBreakEvent event)
+    {
+        Block block = event.getBlock();
+
+        //Checking world now, since this can be expensive(?)
+        if(portalStick.config.DisabledWorlds.contains(block.getWorld().getName()))
+            return;
+        if (event.getBlock().getType() == Material.TNT)
+        {
+            new BukkitRunnable()
+            {
+                public void run()
+                {
+                    for (Entity entity : block.getLocation().getChunk().getEntities())
+                    {
+                        if (entity.getType() == EntityType.PRIMED_TNT)
+                            smartTrackEntity(entity);
+                    }
+                }
+            }.runTaskLater(this, 1L);
+        }
+    }
+
+
 }
