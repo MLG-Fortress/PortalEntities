@@ -115,7 +115,7 @@ public class PortalEntities extends JavaPlugin implements Listener
             Location previousLocation = entity.getLocation();
             public void run()
             {
-                if (entity.isDead())
+                if (entity.isDead() || !entity.isValid())
                 {
                     this.cancel();
                     return;
