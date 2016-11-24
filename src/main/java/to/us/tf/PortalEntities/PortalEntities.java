@@ -90,7 +90,7 @@ public class PortalEntities extends JavaPlugin implements Listener
 
     public Location convertV10Location(V10Location v10Location)
     {
-        return new Location(getServer().getWorld(v10Location.world), v10Location.x, v10Location.y, v10Location.z);
+        return v10Location.getHandle();
     }
 
     public void trackEntity(Entity entity)
