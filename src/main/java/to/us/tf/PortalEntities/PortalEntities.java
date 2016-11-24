@@ -288,22 +288,18 @@ public class PortalEntities extends JavaPlugin implements Listener
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     void onPlayerShootsPortal(PlayerPortalGunShootEvent event)
     {
-        int r;
-        int g;
-        int b;
+        double r = 0;
+        double g = 0;
+        double b = 0;
         switch (event.getAction())
         {
             case LEFT_CLICK_AIR:
             case LEFT_CLICK_BLOCK:
-                r = 255;
-                g = 0;
-                b = 0;
+                r = 1;
                 break;
             case RIGHT_CLICK_AIR:
             case RIGHT_CLICK_BLOCK:
-                r = 0;
-                g = 0;
-                b = 255;
+                b = 1;
                 break;
             default:
                 return;
@@ -316,8 +312,8 @@ public class PortalEntities extends JavaPlugin implements Listener
 
             public void run()
             {
-                world.spawnParticle(Particle.REDSTONE, blockIterator.next().getLocation().add(0.5D, 0.5D, 0.5D), 0, r, g, b, 1D);
-                if (blockIterator.hasNext())
+                world.spawnParticle(Particle.REDSTONE, blockIterator.next().getLocation().add(0.5D, 0.5D, 0.5D), 0, r, g, b, 0.0004D);
+                if (!blockIterator.hasNext())
                     this.cancel();
             }
         }.runTaskTimer(this, 1L, 1L);
