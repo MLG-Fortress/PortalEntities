@@ -2,9 +2,11 @@ package to.us.tf.PortalEntities;
 
 import com.matejdro.bukkit.portalstick.Portal;
 import com.matejdro.bukkit.portalstick.PortalStick;
+import com.matejdro.bukkit.portalstick.events.PlayerPortalGunShootEvent;
 import de.V10lator.PortalStick.V10Location;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -25,6 +27,10 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.awt.*;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by RoboMWM on 11/22/2016.
@@ -274,5 +280,40 @@ public class PortalEntities extends JavaPlugin implements Listener
                 trackEntity(entity);
             }
         }
+    }
+
+    /**
+     * Extra feature
+     */
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    void onPlayerShootsPortal(PlayerPortalGunShootEvent event)
+    {
+        Color color;
+        switch (event.getAction())
+        {
+            case LEFT_CLICK_AIR:
+            case LEFT_CLICK_BLOCK:
+                color = Color.BLUE;
+                break;
+            case RIGHT_CLICK_AIR:
+            case RIGHT_CLICK_BLOCK:
+                color = Color.RED;
+                break;
+            default:
+                return;
+        }
+
+        new BukkitRunnable()
+        {
+            World world = event.getPlayer().getWorld();
+            Iterator<Block> blockIterator = event.getBlocksInLineOfSight().iterator();
+
+            public void run()
+            {
+                world.spawnParticle(Particle.REDSTONE, blockIterator.next().getLocation().add(0.5D, 0.5D, 0.5D), 1, color);
+                if (blockIterator.hasNext())
+                    this.cancel();
+            }
+        }.runTaskTimer(this, 1L, 1L);
     }
 }
