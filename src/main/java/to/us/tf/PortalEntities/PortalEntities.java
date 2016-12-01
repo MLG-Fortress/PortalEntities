@@ -27,10 +27,14 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by RoboMWM on 11/22/2016.
@@ -295,11 +299,11 @@ public class PortalEntities extends JavaPlugin implements Listener
         {
             case LEFT_CLICK_AIR:
             case LEFT_CLICK_BLOCK:
-                red = 1;
+                blue = 1;
                 break;
             case RIGHT_CLICK_AIR:
             case RIGHT_CLICK_BLOCK:
-                blue = 1;
+                red = 1;
                 break;
             default:
                 return;
@@ -309,17 +313,33 @@ public class PortalEntities extends JavaPlugin implements Listener
         final double g = green;
         final double b = blue;
 
+
+
         new BukkitRunnable()
         {
             World world = event.getPlayer().getWorld();
-            Iterator<Block> blockIterator = event.getBlocksInLineOfSight().iterator();
+            Block block = event.getBlocksInLineOfSight().get(event.getBlocksInLineOfSight().size() - 2);
+            Iterator<Vector> vectorIterator = calcLine(event.getPlayer().getLocation().toVector(), block.getLocation().toVector()).iterator();
+            //TODO: add logic to skip every other block depending on size of vectorIterator
 
             public void run()
             {
-                world.spawnParticle(Particle.REDSTONE, blockIterator.next().getLocation().add(0.5D, 0.5D, 0.5D), 0, r, g, b, 0.0004D);
-                if (!blockIterator.hasNext())
+                world.spawnParticle(Particle.REDSTONE, vectorIterator.next().toLocation(world), 0, r, b, g, 0.0004D);
+                if (!vectorIterator.hasNext())
                     this.cancel();
             }
         }.runTaskTimer(this, 1L, 1L);
+    }
+
+    private List<Vector> calcLine(Vector vec1, Vector vec2) {
+        List<Vector> vectors = new ArrayList<>();
+        double length = vec1.distance(vec2) - 1;
+        int points = (int) (length / 1.0D) + 1;
+        double gap = length / (points - 1);
+        Vector gapVector = vec2.clone().subtract(vec1).normalize().multiply(gap);
+        for (int i = 1; i < points; i++) {
+            vectors.add(vec1.clone().add(gapVector.clone().multiply(i)));
+        }
+        return vectors;
     }
 }
