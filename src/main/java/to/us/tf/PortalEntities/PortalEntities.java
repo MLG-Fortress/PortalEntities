@@ -293,7 +293,7 @@ public class PortalEntities extends JavaPlugin implements Listener
     void onPlayerShootsPortal(PlayerPortalGunShootEvent event)
     {
         double red = 0;
-        double green = 0;
+        double green = -1;
         double blue = 0;
         switch (event.getAction())
         {
@@ -319,12 +319,13 @@ public class PortalEntities extends JavaPlugin implements Listener
         {
             World world = event.getPlayer().getWorld();
             Block block = event.getBlocksInLineOfSight().get(event.getBlocksInLineOfSight().size() - 2);
-            Iterator<Vector> vectorIterator = calcLine(event.getPlayer().getLocation().toVector(), block.getLocation().toVector()).iterator();
-            //TODO: add logic to skip every other block depending on size of vectorIterator
+            Iterator<Vector> vectorIterator = calcLine(event.getPlayer().getLocation().add(0D, 1D, 0D).toVector(), block.getLocation().toVector()).iterator();
+            //TODO: add logic to play effect on multiple blocks per tick depending on size of vectorIterator
 
             public void run()
             {
-                world.spawnParticle(Particle.REDSTONE, vectorIterator.next().toLocation(world), 0, r, b, g, 0.0004D); //toLocation can be rewritten async (List of Locations, then schedule sync task for spawnParticle)
+                for (int i = 0; i < 10 && vectorIterator.hasNext(); i++)
+                    world.spawnParticle(Particle.REDSTONE, vectorIterator.next().toLocation(world), 0, r, g, b, 0.0004D); //toLocation can be rewritten async (List of Locations, then schedule sync task for spawnParticle)
                 if (!vectorIterator.hasNext())
                     this.cancel();
             }
