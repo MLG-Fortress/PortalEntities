@@ -325,6 +325,8 @@ public class PortalEntities extends JavaPlugin implements Listener
             public void run()
             {
                 for (int i = 0; i < 10 && vectorIterator.hasNext(); i++)
+                    if (i % 2 == 0)
+                        continue;
                     world.spawnParticle(Particle.REDSTONE, vectorIterator.next().toLocation(world), 0, r, g, b, 0.0004D); //toLocation can be rewritten async (List of Locations, then schedule sync task for spawnParticle)
                 if (!vectorIterator.hasNext())
                     this.cancel();
