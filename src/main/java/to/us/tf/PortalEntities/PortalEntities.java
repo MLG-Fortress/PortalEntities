@@ -299,11 +299,11 @@ public class PortalEntities extends JavaPlugin implements Listener
         {
             case LEFT_CLICK_AIR:
             case LEFT_CLICK_BLOCK:
-                blue = 1;
+                blue = 0.5;
                 break;
             case RIGHT_CLICK_AIR:
             case RIGHT_CLICK_BLOCK:
-                red = 1;
+                red = 0.5;
                 break;
             default:
                 return;
@@ -312,8 +312,6 @@ public class PortalEntities extends JavaPlugin implements Listener
         final double r = red;
         final double g = green;
         final double b = blue;
-
-
 
         new BukkitRunnable()
         {
@@ -325,15 +323,22 @@ public class PortalEntities extends JavaPlugin implements Listener
             public void run()
             {
                 for (int i = 0; i < 10 && vectorIterator.hasNext(); i++)
+                {
                     if (i % 2 == 0)
+                    {
+                        vectorIterator.next();
                         continue;
+                    }
                     world.spawnParticle(Particle.REDSTONE, vectorIterator.next().toLocation(world), 0, r, g, b, 0.0004D); //toLocation can be rewritten async (List of Locations, then schedule sync task for spawnParticle)
-                if (!vectorIterator.hasNext())
-                    this.cancel();
+                    if (!vectorIterator.hasNext())
+                        this.cancel();
+                }
+
             }
         }.runTaskTimer(this, 1L, 1L);
     }
 
+    //https://www.spigotmc.org/threads/how-to-make-a-straight-particle-line.156411/#post-1661911
     private List<Vector> calcLine(Vector vec1, Vector vec2) {
         List<Vector> vectors = new ArrayList<>();
         double length = vec1.distance(vec2) - 1;
