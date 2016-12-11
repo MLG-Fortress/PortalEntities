@@ -292,7 +292,7 @@ public class PortalEntities extends JavaPlugin implements Listener
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     void onPlayerShootsPortal(PlayerPortalGunShootEvent event)
     {
-        double red = -1D;
+        double red = -10D;
         double green = 0D;
         double blue = 0D;
         switch (event.getAction())
