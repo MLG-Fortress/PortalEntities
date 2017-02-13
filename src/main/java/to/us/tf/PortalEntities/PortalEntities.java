@@ -300,7 +300,7 @@ public class PortalEntities extends JavaPlugin implements Listener
             case LEFT_CLICK_AIR:
                 blue = 1D;
                 red = 0.2D;
-                green = 0.2D;
+                green = 0.4D;
                 break;
             case RIGHT_CLICK_AIR:
                 red = 1D;
