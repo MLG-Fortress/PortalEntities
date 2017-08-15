@@ -7,6 +7,7 @@ import de.V10lator.PortalStick.V10Location;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.SoundCategory;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -29,12 +30,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by RoboMWM on 11/22/2016.
@@ -301,10 +299,12 @@ public class PortalEntities extends JavaPlugin implements Listener
                 blue = 1D;
                 red = 0.2D;
                 green = 0.4D;
+                event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), "fortress.portal.blue", SoundCategory.PLAYERS, 1.0f, 1.0f);
                 break;
             case RIGHT_CLICK_AIR:
                 red = 1D;
                 green = 0.5D;
+                event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), "fortress.portal.orange", SoundCategory.PLAYERS, 1.0f, 1.0f);
                 break;
             default:
                 return;
