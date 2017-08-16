@@ -299,11 +299,13 @@ public class PortalEntities extends JavaPlugin implements Listener
                 blue = 1D;
                 red = 0.2D;
                 green = 0.4D;
+            case LEFT_CLICK_BLOCK:
                 event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), "fortress.portal.blue", SoundCategory.PLAYERS, 1.0f, 1.0f);
                 break;
             case RIGHT_CLICK_AIR:
                 red = 1D;
                 green = 0.5D;
+            case RIGHT_CLICK_BLOCK:
                 event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), "fortress.portal.orange", SoundCategory.PLAYERS, 1.0f, 1.0f);
                 break;
             default:
