@@ -290,6 +290,8 @@ public class PortalEntities extends JavaPlugin implements Listener
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     void onPlayerShootsPortal(PlayerPortalGunShootEvent event)
     {
+        if (event.getBlocksInLineOfSight().size() < 2)
+            return;
         double red = Float.MIN_NORMAL; //Double.MIN_NORMAL is too small
         double green = 0D;
         double blue = 0D;
