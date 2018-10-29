@@ -298,30 +298,30 @@ public class PortalEntities extends JavaPlugin implements Listener
         //double red = Float.MIN_NORMAL; //Double.MIN_NORMAL is too small
         //double green = 0D;
         //double blue = 0D;
-        Color color = null;
-        switch (event.getAction())
-        {
-            case LEFT_CLICK_AIR:
-                //blue = 1D;
-                //red = 0.2D;
-                //green = 0.4D;
-                color = Color.BLUE;
-            case LEFT_CLICK_BLOCK:
-                event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), "fortress.portal.blue", SoundCategory.PLAYERS, 1.0f, 1.0f);
-                break;
-            case RIGHT_CLICK_AIR:
-                //red = 1D;
-                //green = 0.5D;
-                color = Color.ORANGE;
-            case RIGHT_CLICK_BLOCK:
-                event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), "fortress.portal.orange", SoundCategory.PLAYERS, 1.0f, 1.0f);
-                break;
-            default:
-                return;
-        }
+        Color color = event.getColor().getColor();
+//        switch (event.getAction())
+//        {
+//            case LEFT_CLICK_AIR:
+//                //blue = 1D;
+//                //red = 0.2D;
+//                //green = 0.4D;
+//                color = Color.BLUE;
+//            case LEFT_CLICK_BLOCK:
+//                event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), "fortress.portal.blue", SoundCategory.PLAYERS, 1.0f, 1.0f);
+//                break;
+//            case RIGHT_CLICK_AIR:
+//                //red = 1D;
+//                //green = 0.5D;
+//                color = Color.ORANGE;
+//            case RIGHT_CLICK_BLOCK:
+//                event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), "fortress.portal.orange", SoundCategory.PLAYERS, 1.0f, 1.0f);
+//                break;
+//            default:
+//                return;
+//        }
 
-        if (color == null)
-            return;
+//        if (color == null)
+//            return;
 
         final Color finalColor = color;
         new BukkitRunnable()
