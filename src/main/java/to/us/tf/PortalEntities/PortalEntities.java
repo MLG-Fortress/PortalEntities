@@ -1,5 +1,6 @@
 package to.us.tf.PortalEntities;
 
+import com.destroystokyo.paper.ParticleBuilder;
 import com.matejdro.bukkit.portalstick.Portal;
 import com.matejdro.bukkit.portalstick.PortalStick;
 import com.matejdro.bukkit.portalstick.events.PlayerPortalGunShootEvent;
@@ -287,6 +288,7 @@ public class PortalEntities extends JavaPlugin implements Listener
 
     /**
      * Extra feature
+     * TODO: add color to event
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     void onPlayerShootsPortal(PlayerPortalGunShootEvent event)
@@ -343,8 +345,8 @@ public class PortalEntities extends JavaPlugin implements Listener
                         vectorIterator.next();
                         continue;
                     }
-                    Particle particle = Particle.REDSTONE;
-                    world.spawnParticle(particle.builder().color(finalColor).particle(), vectorIterator.next().toLocation(world), 1);
+                    ParticleBuilder particle = Particle.REDSTONE.builder().color(finalColor);
+                    world.spawnParticle(particle.particle(), vectorIterator.next().toLocation(world), 1, particle.data());
                     //world.spawnParticle(particle.builder().color(), vectorIterator.next().toLocation(world), 0, r, g, b, 1D); //toLocation can be rewritten async (List of Locations, then schedule sync task for spawnParticle)
                 }
             }
