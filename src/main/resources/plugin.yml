@@ -3,6 +3,7 @@ version: ${project.version}
 description: Addon for PortalStick that allows entities to go through portals.
 #website:
 author: RoboMWM
+api-version: 1.13
 main: to.us.tf.PortalEntities.PortalEntities
 softdepend:
 - PortalStick

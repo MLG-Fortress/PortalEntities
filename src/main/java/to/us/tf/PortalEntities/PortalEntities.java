@@ -4,6 +4,7 @@ import com.matejdro.bukkit.portalstick.Portal;
 import com.matejdro.bukkit.portalstick.PortalStick;
 import com.matejdro.bukkit.portalstick.events.PlayerPortalGunShootEvent;
 import de.V10lator.PortalStick.V10Location;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -292,21 +293,24 @@ public class PortalEntities extends JavaPlugin implements Listener
     {
         if (event.getBlocksInLineOfSight().size() < 2)
             return;
-        double red = Float.MIN_NORMAL; //Double.MIN_NORMAL is too small
-        double green = 0D;
-        double blue = 0D;
+        //double red = Float.MIN_NORMAL; //Double.MIN_NORMAL is too small
+        //double green = 0D;
+        //double blue = 0D;
+        Color color = null;
         switch (event.getAction())
         {
             case LEFT_CLICK_AIR:
-                blue = 1D;
-                red = 0.2D;
-                green = 0.4D;
+                //blue = 1D;
+                //red = 0.2D;
+                //green = 0.4D;
+                color = Color.BLUE;
             case LEFT_CLICK_BLOCK:
                 event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), "fortress.portal.blue", SoundCategory.PLAYERS, 1.0f, 1.0f);
                 break;
             case RIGHT_CLICK_AIR:
-                red = 1D;
-                green = 0.5D;
+                //red = 1D;
+                //green = 0.5D;
+                color = Color.ORANGE;
             case RIGHT_CLICK_BLOCK:
                 event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), "fortress.portal.orange", SoundCategory.PLAYERS, 1.0f, 1.0f);
                 break;
@@ -314,16 +318,15 @@ public class PortalEntities extends JavaPlugin implements Listener
                 return;
         }
 
-        final double r = red;
-        final double g = green;
-        final double b = blue;
+        if (color == null)
+            return;
 
+        final Color finalColor = color;
         new BukkitRunnable()
         {
             World world = event.getPlayer().getWorld();
             Block block = event.getBlocksInLineOfSight().get(event.getBlocksInLineOfSight().size() - 2);
             Iterator<Vector> vectorIterator = calcLine(event.getPlayer().getLocation().add(0D, 1D, 0D).toVector(), block.getLocation().toVector()).iterator();
-            //TODO: add logic to play effect on multiple blocks per tick depending on size of vectorIterator
 
             public void run()
             {
@@ -340,10 +343,12 @@ public class PortalEntities extends JavaPlugin implements Listener
                         vectorIterator.next();
                         continue;
                     }
-                    world.spawnParticle(Particle.REDSTONE, vectorIterator.next().toLocation(world), 0, r, g, b, 1D); //toLocation can be rewritten async (List of Locations, then schedule sync task for spawnParticle)
+                    Particle particle = Particle.REDSTONE;
+                    world.spawnParticle(particle.builder().color(finalColor).particle(), vectorIterator.next().toLocation(world), 1);
+                    //world.spawnParticle(particle.builder().color(), vectorIterator.next().toLocation(world), 0, r, g, b, 1D); //toLocation can be rewritten async (List of Locations, then schedule sync task for spawnParticle)
                 }
             }
-        }.runTaskTimer(this, 1L, 1L);
+        }.runTaskTimerAsynchronously(this, 1L, 1L);
     }
 
     //https://www.spigotmc.org/threads/how-to-make-a-straight-particle-line.156411/#post-1661911
