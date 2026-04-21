@@ -218,7 +218,7 @@ public class PortalEntities extends JavaPlugin implements Listener
                 {
                     for (Entity entity : block.getLocation().getChunk().getEntities())
                     {
-                        if (entity.getType() == EntityType.PRIMED_TNT)
+                        if (entity.getType() == EntityType.TNT)
                             smartTrackEntity(entity);
                     }
                 }
@@ -241,7 +241,7 @@ public class PortalEntities extends JavaPlugin implements Listener
                 {
                     for (Entity entity : block.getLocation().getChunk().getEntities())
                     {
-                        if (entity.getType() == EntityType.PRIMED_TNT)
+                        if (entity.getType() == EntityType.TNT)
                             smartTrackEntity(entity);
                     }
                 }
@@ -345,7 +345,7 @@ public class PortalEntities extends JavaPlugin implements Listener
                         vectorIterator.next();
                         continue;
                     }
-                    ParticleBuilder particle = Particle.REDSTONE.builder().color(finalColor);
+                    ParticleBuilder particle = Particle.DUST.builder().color(finalColor);
                     world.spawnParticle(particle.particle(), vectorIterator.next().toLocation(world), 1, particle.data());
                     //world.spawnParticle(particle.builder().color(), vectorIterator.next().toLocation(world), 0, r, g, b, 1D); //toLocation can be rewritten async (List of Locations, then schedule sync task for spawnParticle)
                 }
